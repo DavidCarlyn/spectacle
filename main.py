@@ -39,11 +39,11 @@ class NN_Node():
                     data_json[key] = value.detach().numpy().tolist()
                 else:
                     data_json[key] = value
+        
         return {
-            self.name : {
+                "name" : self.name,
                 "data" : data_json,
                 "children" : children_json
-            }
         }
 
     # print override
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     data = graph.get_json()
 
     print("Saving")
-    with open("test.json", "w") as f:
+    with open("resnet18_weights.json", "w") as f:
         json.dump(data, f)
 
     print("Done.")
