@@ -2,8 +2,6 @@
  * global.js
  * Main script for handling drawing
  * 
- * TODO: Fix height calculation for containers (look at max height)
- * TODO: Fix on click for leaf nodes
  * TODO: Fix coloring (pick good colors)
  * TODO: Add Text to rects (Conv2d, ReLU, etc.)
 *******************************************************/
@@ -108,16 +106,15 @@ async function drawArchitecture() {
         .attr("width",(d, i) => d.drawVars.width)
         .attr("x", (d, i) => d.drawVars.x)
         .attr("y", (d, i) => d.drawVars.y)
-        .append("title").text((d, i) => d.name)
         .on('click', (htmlEle, d) => {
-            console.log(d)
             currentDesign = getDesignFromString(d.name);
             if (currentDesign === DESIGNS.INVALID) {
                 currentDesign = DESIGNS.ARCHITECTURE;
             } else {
                 draw(d);
             }
-        });
+        })
+        .append("title").text((d, i) => d.name);
 
 }
 
@@ -173,14 +170,15 @@ function calcDrawVars(node, position) {
     if (node.children.length > 0) {
         nextPosition.x += CONTAINER_PADDING
         nextPosition.y += CONTAINER_PADDING
-        maxHeight = 0
+        var maxHeight = 0
+
         // Cycle through children
         node.children.forEach(child => {
             calcDrawVars(child, nextPosition) // Recursion
+            let cHeight = child.drawVars.height
             nextPosition.x = NODE_DISTANCE + child.drawVars.x + child.drawVars.width
-            maxHeight = child.drawVars.height > maxHeight ? child.drawVars.height : maxHeight
+            maxHeight = cHeight > maxHeight ? cHeight : maxHeight
         });
-
         height = CONTAINER_PADDING * 2 + maxHeight;
         nextPosition.x -= NODE_DISTANCE
         nextPosition.x += CONTAINER_PADDING
