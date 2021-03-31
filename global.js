@@ -20,7 +20,12 @@ const DESIGNS = {
     INVALID: 'invalid'
 };
 
+const ACTIVE_ID = 'active';
+const TOOLTIP_ID = 'tooltip';
+const LEAF_CLASS = 'leaf';
+const CLICKABLE_CLASS = 'clickable';
 const FONT_SIZE = 14;
+const FONT_FAMILY = 'Arial';
 const LEAF_PADDING = 10;
 const CONTAINER_PADDING = 20;
 const NODE_DISTANCE = 50;
@@ -97,8 +102,11 @@ function drawConv2d(data) {
 /****************************************************** 
  * Function for handling the architectur drawing.
  * 
- * TODO: Fix coloring (pick good colors)
- * TODO: Add Text to rects (Conv2d, ReLU, etc.)
+ * TODO: Center architecture
+ * TODO: Draw arrows between modules
+ * TODO: Center Text
+ * TODO: Fix mouseover for leaves with text (highlight goes away)
+ * TODO: Add tooltip with quick information about module when mouseover
 *******************************************************/
 async function drawArchitecture() {
 
@@ -129,8 +137,8 @@ async function drawArchitecture() {
     svg.selectAll("rect_containers")
         .data(containers)
         .enter().append("rect")
-        .style("stroke", "gray")
-        .style("fill", "#080808")
+        .style("stroke", "black")
+        .style("fill", "#28282828")
         .attr("height", (d, i) => d.drawVars.height)
         .attr("width",(d, i) => d.drawVars.width)
         .attr("x", (d, i) => d.drawVars.x)
@@ -141,13 +149,20 @@ async function drawArchitecture() {
     svg.selectAll("rect_leaves")
         .data(leaves)
         .enter().append("rect")
-        .style("stroke", "gray")
-        .style("fill", "red")
+        .style("stroke", "black")
+        .style("fill", "white")
         .attr("height", (d, i) => d.drawVars.height)
-        .attr("width",(d, i) => d.drawVars.width)
+        .attr("width", (d, i) => d.drawVars.width)
+        .attr("class", (d, i) => {
+            var classes = LEAF_CLASS;
+            if (getDesignFromString(d.name) !== DESIGNS.INVALID) {
+                classes += " " + CLICKABLE_CLASS;
+            }
+            return classes
+        })
         .attr("x", (d, i) => d.drawVars.x)
         .attr("y", (d, i) => d.drawVars.y)
-        .on('click', (htmlEle, d) => {
+        .on('click', (evt, d) => {
             currentDesign = getDesignFromString(d.name);
             if (currentDesign === DESIGNS.INVALID) {
                 currentDesign = DESIGNS.ARCHITECTURE;
@@ -155,10 +170,27 @@ async function drawArchitecture() {
                 draw(d);
             }
         })
+        .on('mouseover', (evt, d) => {
+            console.log(evt.target)
+            evt.target.id = ACTIVE_ID;
+            createToolTip(evt, d)
+        })
+        .on('mouseout', evt => {
+            evt.target.id = '';
+            removeToolTip()
+        })
         .append("title").text((d, i) => d.name);
 
-}
+    // Draw Leaf text
+    svg.selectAll("rect_leaf_text")
+        .data(leaves)
+        .enter().append("text")
+        .attr("x", (d, i) => d.drawVars.x + LEAF_PADDING)
+        .attr("y", (d, i) => d.drawVars.y + LEAF_PADDING + FONT_SIZE)
+        .attr("font-size", FONT_SIZE + "px")
+        .text((d, i) => d.name)
 
+}
 
 /****************************************************** 
  *!               Helper Functions                    *
@@ -280,9 +312,51 @@ async function getData() {
 /****************************************************** 
  * TODO: Document
 *******************************************************/
+function createModuleToolTipDescription(d) {
+    var text = d.name + '<br>';
+    text += "Example text here" + '<br>';
+    text += "Example text here" + '<br>';
+    return text;
+}
+
+/****************************************************** 
+ * TODO: Document
+*******************************************************/
+function createToolTip(evt, d) {
+    // Create Tooltip box
+    var div = document.createElement("DIV");
+    div.style.top = (evt.y + window.scrollY + 10) + "px";
+    div.style.left = (evt.x + window.scrollX + 10) + "px";
+    div.id = TOOLTIP_ID;
+
+    // Set Tooltip text
+    div.innerHTML = createModuleToolTipDescription(d);
+
+    // Add to body
+    document.body.appendChild(div);
+}
+/****************************************************** 
+ * TODO: Document
+*******************************************************/
+function removeToolTip() {
+    // Remove tooltip
+    div = document.getElementById(TOOLTIP_ID);
+    div.remove()
+}
+/****************************************************** 
+ * TODO: Document
+*******************************************************/
 function clear() {
     drawArea = document.getElementById(SVG_ID);
     drawArea.innerHTML = ''; //TODO: optimize later
+}
+
+/****************************************************** 
+ * TODO: Document
+*******************************************************/
+function reset() {
+    currentDesign = DESIGNS.ARCHITECTURE;
+    draw(null);
 }
 
 

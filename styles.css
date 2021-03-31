@@ -1,0 +1,16 @@
+#tooltip {
+    position: absolute;
+    background-color: lightskyblue;
+    padding: 5px;
+    border-radius: 4px;
+    border-style: solid;
+    border-color: black;
+}
+
+.clickable:hover {
+    cursor: pointer;
+}
+
+.leaf#active {
+    fill: aqua !important;
+}
