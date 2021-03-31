@@ -106,7 +106,6 @@ function drawConv2d(data) {
  * TODO: Draw arrows between modules
  * TODO: Center Text
  * TODO: Fix mouseover for leaves with text (highlight goes away)
- * TODO: Add tooltip with quick information about module when mouseover
 *******************************************************/
 async function drawArchitecture() {
 
@@ -171,7 +170,6 @@ async function drawArchitecture() {
             }
         })
         .on('mouseover', (evt, d) => {
-            console.log(evt.target)
             evt.target.id = ACTIVE_ID;
             createToolTip(evt, d)
         })
@@ -313,9 +311,30 @@ async function getData() {
  * TODO: Document
 *******************************************************/
 function createModuleToolTipDescription(d) {
-    var text = d.name + '<br>';
-    text += "Example text here" + '<br>';
-    text += "Example text here" + '<br>';
+    var text = "<strong>" + d.name + "</strong><br>";
+    if (d.name == "Conv2d") {
+        text += "Kernel Size: " + d.data.kernel_size.toString().replace(',', ' x ') + "<br>";
+        text += "In Channels: " + d.data.in_channels + "<br>";
+        text += "Out Channels: " + d.data.out_channels + "<br>";
+        text += "Padding: " + d.data.padding.toString().replace(',', ' x ') + "<br>";
+        text += "Stride: " + d.data.stride.toString().replace(',', ' x ') + "<br>";
+    } else if (d.name == "BatchNorm2d") {
+        text += "# of features: " + d.data.num_features;
+    } else if (d.name == "ReLU") {
+        text += ""
+    } else if (d.name == "MaxPool2d") {
+        text += "Kernel Size: " + d.data.kernel_size + "<br>";
+        text += "Padding: " + d.data.padding + "<br>";
+        text += "Stride: " + d.data.stride;
+    } else if (d.name == "AdaptiveAvgPool2d") {
+        text += "Output Size: " + d.data.output_size.toString().replace(',', ' x ');
+    } else if (d.name == "Linear") {
+        text += "In Features: " + d.data.in_features + "<br>";
+        text += "Out Features: " + d.data.out_features;
+    } else {
+        text += "Not implemented";
+    }
+
     return text;
 }
 
@@ -341,12 +360,15 @@ function createToolTip(evt, d) {
 function removeToolTip() {
     // Remove tooltip
     div = document.getElementById(TOOLTIP_ID);
-    div.remove()
+    if (div) {
+        div.remove()
+    }
 }
 /****************************************************** 
  * TODO: Document
 *******************************************************/
 function clear() {
+    removeToolTip()
     drawArea = document.getElementById(SVG_ID);
     drawArea.innerHTML = ''; //TODO: optimize later
 }
@@ -358,7 +380,6 @@ function reset() {
     currentDesign = DESIGNS.ARCHITECTURE;
     draw(null);
 }
-
 
 /****************************************************** 
  *!               Initial Draw Call
