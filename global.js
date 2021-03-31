@@ -1,16 +1,15 @@
 /****************************************************** 
  * global.js
  * Main script for handling drawing
- * 
- * TODO: Fix coloring (pick good colors)
- * TODO: Add Text to rects (Conv2d, ReLU, etc.)
 *******************************************************/
 
 
 /****************************************************** 
- * Global Variables
-*******************************************************/
-//! GLOBAL CONSTANTS
+ ****************************************************** 
+ *!              Global Variables                     *
+ ******************************************************
+******************************************************/
+//! CONSTANTS
 const SVG_ID = "network";
 const LOADING_PATH = "loading.gif";
 const DESIGNS = {
@@ -26,16 +25,25 @@ const LEAF_PADDING = 10;
 const CONTAINER_PADDING = 20;
 const NODE_DISTANCE = 50;
 
-//! GLOBAL VARS
+//! VARS
 let currentDesign = DESIGNS.ARCHITECTURE;
 
 /****************************************************** 
- * Functions
-*******************************************************/
+ ****************************************************** 
+ *!                  Functions                        *
+ ******************************************************
+******************************************************/
 
-//! Main Draw Function
-function draw(elementData) {
-    //! Clear Area
+/****************************************************** 
+ *!                Draw Functions                     *
+******************************************************/
+
+/****************************************************** 
+ * Main function for handling our project and all
+ * drawings
+*******************************************************/
+function draw(moduleData) {
+    // Clear Area
     clear()
 
     switch (currentDesign) {
@@ -43,13 +51,13 @@ function draw(elementData) {
             drawArchitecture();
             break;
         case DESIGNS.CONV2D:
-            console.log(currentDesign + ' design not implemented');
+            drawConv2d(moduleData);
             break;
         case DESIGNS.BATCHNORM2D:
-            console.log(currentDesign + ' design not implemented');
+            drawBatchNorm2d(moduleData);
             break;
         case DESIGNS.LINEAR:
-            console.log(currentDesign + ' design not implemented');
+            drawLinear(moduleData);
             break;
         default:
             console.log('current design is not valid!');
@@ -57,8 +65,41 @@ function draw(elementData) {
 
 }
 
-//! Main Design Draw Functions
+/****************************************************** 
+ * Function for handling the batch normalization layer
+ * drawing.
+ * 
+ * TODO: NOT STARTED
+*******************************************************/
+function drawBatchNorm2d(data) {
+    console.log(currentDesign + ' design not implemented');
+}
 
+/****************************************************** 
+ * Function for handling the Linear layer drawing
+ * 
+ * TODO: NOT STARTED
+*******************************************************/
+function drawLinear(data) {
+    console.log(currentDesign + ' design not implemented');
+}
+
+/****************************************************** 
+ * Function for handling the convolutional layer
+ * drawing.
+ * 
+ * TODO: NOT STARTED
+*******************************************************/
+function drawConv2d(data) {
+    console.log(currentDesign + ' design not implemented');
+}
+
+/****************************************************** 
+ * Function for handling the architectur drawing.
+ * 
+ * TODO: Fix coloring (pick good colors)
+ * TODO: Add Text to rects (Conv2d, ReLU, etc.)
+*******************************************************/
 async function drawArchitecture() {
 
     //Toggle Loading Image
@@ -118,9 +159,14 @@ async function drawArchitecture() {
 
 }
 
-//! Helper Functions
 
-// Get Design Enum from String
+/****************************************************** 
+ *!               Helper Functions                    *
+******************************************************/
+
+/****************************************************** 
+ * TODO: Document
+*******************************************************/
 function getDesignFromString(name) {
     switch (name) {
         case 'Conv2d':
@@ -136,7 +182,9 @@ function getDesignFromString(name) {
     }
 }
 
-// Toggle loading image
+/****************************************************** 
+ * TODO: Document
+*******************************************************/
 function toggleLoadingImage() {
     const LOADING_ID = "loading_image";
     loadingElement = document.getElementById(LOADING_ID);
@@ -154,7 +202,9 @@ function toggleLoadingImage() {
 
 }
 
-// Calculate the positional & size variables for each node
+/****************************************************** 
+ * TODO: Document
+*******************************************************/
 function calcDrawVars(node, position) {
     node.drawVars = {
         x : position.x,
@@ -193,7 +243,9 @@ function calcDrawVars(node, position) {
     node.drawVars.height = height
 }
 
-// Obtaining Data & Cleaning it
+/****************************************************** 
+ * TODO: Document
+*******************************************************/
 async function getData() {
     var leaves = []
     var containers = []
@@ -225,10 +277,16 @@ async function getData() {
     return [containers, leaves];
 }
 
-// Clear Draw Area
+/****************************************************** 
+ * TODO: Document
+*******************************************************/
 function clear() {
     drawArea = document.getElementById(SVG_ID);
     drawArea.innerHTML = ''; //TODO: optimize later
 }
 
+
+/****************************************************** 
+ *!               Initial Draw Call
+*******************************************************/
 draw(null);
