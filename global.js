@@ -96,7 +96,35 @@ function drawLinear(data) {
  * TODO: NOT STARTED
 *******************************************************/
 function drawConv2d(data) {
-    console.log(currentDesign + ' design not implemented');
+    let height = 100;
+    let width = 100;
+    var svg = d3.select('#' + SVG_ID)
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    let kernel_ex = data.data.weight[0][0]
+
+    // Setting up data per row
+    var row = svg.selectAll(".kernel_row")
+        .data(kernel_ex)
+        .enter().append("g")
+        .attr("class", "kernel_row")
+        .attr("transform", (d, i) => "translate(0, " + (i * 20 + i + 1) + ")")
+        .each(draw_row);
+
+    function draw_row(row) {
+        var cell = d3.select(this).selectAll(".kernel_cell")
+            .data(row)
+            .enter().append("rect")
+            .attr("class", "kernel_cell")
+            .attr("x", (d, i) => i * 20 + i * 1)
+            .attr("width", 20)
+            .attr("height", 20)
+            .style("fill", d => "red");
+            //.on("mouseover", mouseover)
+            //.on("mouseout", mouseout);
+    }
 }
 
 /****************************************************** 
@@ -119,12 +147,6 @@ async function drawArchitecture() {
     
     //Toggle Loading Image
     toggleLoadingImage();
-
-    // ! Initialize Draw Area
-    var height = screen.height * .8;
-    var width = screen.width;
-
-    console.log(containers[0])
 
     var svg = d3.select('#' + SVG_ID)
         .append("svg")
@@ -171,7 +193,7 @@ async function drawArchitecture() {
         })
         .on('mouseover', (evt, d) => {
             evt.target.id = ACTIVE_ID;
-            createToolTip(evt, d)
+            createModuleToolTip(evt, d)
         })
         .on('mouseout', evt => {
             evt.target.id = '';
@@ -341,7 +363,16 @@ function createModuleToolTipDescription(d) {
 /****************************************************** 
  * TODO: Document
 *******************************************************/
-function createToolTip(evt, d) {
+function createModuleToolTip(evt, d) {
+    // Tooltip text
+    text = createModuleToolTipDescription(d);
+
+    createToolTip(evt, text);
+}
+/****************************************************** 
+ * TODO: Document
+*******************************************************/
+function createToolTip(evt, text) {
     // Create Tooltip box
     var div = document.createElement("DIV");
     div.style.top = (evt.y + window.scrollY + 10) + "px";
@@ -349,7 +380,7 @@ function createToolTip(evt, d) {
     div.id = TOOLTIP_ID;
 
     // Set Tooltip text
-    div.innerHTML = createModuleToolTipDescription(d);
+    div.innerHTML = text;
 
     // Add to body
     document.body.appendChild(div);
