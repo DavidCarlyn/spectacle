@@ -93,37 +93,78 @@ function drawLinear(data) {
  * Function for handling the convolutional layer
  * drawing.
  * 
- * TODO: NOT STARTED
+ * TODO: Clean up / stylize
+ * TODO: Add legend
+ * TODO: Make size react to user window size
+ * TODO: Create tooltip per cell
+ * TODO: Create a highlight mechanism for mouseover a cell
 *******************************************************/
 function drawConv2d(data) {
-    let height = 100;
-    let width = 100;
+    let cellSize = 20;
+    let cellBorder = 1;
+    let margin = 50;
+
+    let kernelWidth = cellSize * data.data.kernel_size[0] + cellBorder * (data.data.kernel_size[0] + 1) // Kernel Size
+    let width = kernelWidth * data.data.in_channels + (margin - 1) * data.data.in_channels // In Channel
+    let kernelHeight = cellSize * data.data.kernel_size[1] + cellBorder * (data.data.kernel_size[1] + 1) // Kernel Size
+    let height = kernelHeight * data.data.out_channels + (margin - 1) * data.data.out_channels // In Channel
+
     var svg = d3.select('#' + SVG_ID)
         .append("svg")
         .attr("width", width)
         .attr("height", height);
 
-    let kernel_ex = data.data.weight[0][0]
+    let weights = data.data.weight;
 
-    // Setting up data per row
-    var row = svg.selectAll(".kernel_row")
-        .data(kernel_ex)
+    // Creating Colors
+    let min = Math.min.apply(Math, weights.map(ic => Math.min.apply(Math, ic.map(oc => Math.min.apply(Math, oc.map(kw => Math.min.apply(Math, kw.map(kh => kh))))))));
+    let max = Math.max.apply(Math, weights.map(ic => Math.max.apply(Math, ic.map(oc => Math.max.apply(Math, oc.map(kw => Math.max.apply(Math, kw.map(kh => kh))))))));
+
+    const COLORS = d3.scaleLinear()
+        .domain([min, 0, max])
+        .range(["#ff1414", "#ffffff", "#08c718"]);
+
+    // Setting up data to be drawn
+    weights = []
+    data.data.weight.forEach( (inChannel, i) => {
+        inChannel.forEach( (kernel, j) => {
+            weights.push({
+                kernel: kernel,
+                in_channel: j,
+                out_channel: i
+            });
+        });
+    });
+
+    var kernels = svg.selectAll(".kernel")
+        .data(weights)
         .enter().append("g")
-        .attr("class", "kernel_row")
-        .attr("transform", (d, i) => "translate(0, " + (i * 20 + i + 1) + ")")
-        .each(draw_row);
+        .attr("class", "kernel")
+        .attr("transform", (d, i) => "translate(" + (d.in_channel * kernelWidth + d.in_channel * margin) + ", " + (d.out_channel * kernelHeight + d.out_channel * margin) + ")")
+        .each(drawKernels)
 
-    function draw_row(row) {
-        var cell = d3.select(this).selectAll(".kernel_cell")
-            .data(row)
+    function drawKernels(data) {
+        // Kernel Row
+        var cell = d3.select(this).selectAll(".kernel_row")
+            .data(data.kernel)
+            .enter().append("g")
+            .attr("class", "kernel_row")
+            .attr("transform", (d, i) => "translate(0, " + (i * cellSize + i * cellBorder) + ")")
+            .each(drawKernelCells);
+    }
+
+    function drawKernelCells(data) {
+        // Kernel Cell
+        d3.select(this).selectAll(".kernel_cell")
+            .data(data)
             .enter().append("rect")
             .attr("class", "kernel_cell")
-            .attr("x", (d, i) => i * 20 + i * 1)
-            .attr("width", 20)
-            .attr("height", 20)
-            .style("fill", d => "red");
-            //.on("mouseover", mouseover)
-            //.on("mouseout", mouseout);
+            .attr("x", (d, i) => i * cellSize + i * cellBorder)
+            .attr("width", cellSize)
+            .attr("height", cellSize)
+            .style("fill", d => COLORS(d))
+            .on("mouseover", (evt, d) => createToolTip(evt, "Value: " + d))
+            .on("mouseout", (evt, d) => removeToolTip());
     }
 }
 
