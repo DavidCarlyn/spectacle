@@ -86,7 +86,128 @@ function drawBatchNorm2d(data) {
  * TODO: NOT STARTED
 *******************************************************/
 function drawLinear(data) {
-    console.log(currentDesign + ' design not implemented');
+    //console.log(currentDesign + ' design not implemented');
+     //console.log(currentDesign + ' design not implemented');
+    weight_matrix = data["data"]["weight"] ;
+    let width = 3072 ; //512*6
+    let height = 6000;  //1000*6
+    var margin = {top: 30, right: 30, bottom: 30, left: 30} ; 
+
+    var numcols = weight_matrix[1].length;//512
+    var numrows = weight_matrix.length; //1000
+
+    var svg = d3.select('#' + SVG_ID)
+        .append("svg")
+        .attr("width", width+margin.left)
+        .attr("height", height+ margin.top) ; 
+        
+
+    svg.append("rect")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var x = d3.scale.ordinal()
+    .domain(d3.range(numcols))
+    .rangeBands([30, width+ margin.left]);
+
+    var y = d3.scale.ordinal()
+    .domain(d3.range(numrows))
+    .rangeBands([30, height+ margin.top]);
+    
+    //find max/min weight value
+    /*min = weight_matrix[0][0] ; 
+    max = weight_matrix[0][0] ; 
+    for (var i = 0; i < numrows; i++) {
+        for (var j = 0; j < numcols; j++) {
+           if(weight_matrix[i][j]<min){
+                min= weight_matrix[i][j] ; 
+           }
+           if(weight_matrix[i][j]>max){
+                max= weight_matrix[i][j] ; 
+           }
+    }
+    console.log(max, "  ", min) ;  */
+    var max =0.043576840311288834 ; 
+    var min = -0.04393909499049187 ; 
+
+    //labels for x,y axis
+    var x_label = [], y_label=[] ; 
+    for(var i =0 ; i<numcols; i++){
+        x_label.push(i) ; 
+    }
+    for(var i =0 ; i<numrows; i++){
+        y_label.push(i) ; 
+    }
+
+    //FIXME: will change later 
+    var colorMap = d3.scale.linear()
+    .domain([min,0.02, max])
+    .range(["white", "blue", "red"]); 
+
+
+    var row = svg.selectAll(".row")
+    .data(weight_matrix)
+    .enter().append("g")
+    .attr("class", "row")
+    .attr("transform", function(d, i) { return "translate(0," + y(i) + ")"; });
+  
+  row.selectAll(".cell")
+    .data(function(d) {  return d; })
+    .enter().append("rect")
+    .attr("class", "cell")
+    .attr("x", function(d, i) { return x(i); })
+    .attr("width", x.rangeBand())
+    .attr("height", y.rangeBand())
+    .style("stroke-width", 1);
+
+
+
+var x_axis= svg.selectAll(".x_axis")
+    .data(x_label)
+    .enter().append("g")
+    .attr("transform", function(d, i) { return "translate(" + x(i) + ", 25)"; });
+
+x_axis.append("text")
+    .attr("text-anchor", "start")
+    .style("font-size",  3)
+    .text(function(d, i) { return d; }); 
+
+
+//y axis 
+   var y_axis = svg.selectAll(".y_axis")
+    .data(y_label)
+    .enter().append("g")
+    .attr("transform", function(d, i) {  var temp=y(i)+4; return "translate(25, " + temp +")"; });
+
+    y_axis.append("text")
+    .attr("text-anchor", "start")
+    .style("font-size",  3)
+    .text(function(d, i) { return d; });
+
+//x,y  axis title
+svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("x", 200)
+    .attr("y", 20 )
+    .text("X axis: Input Channel");
+svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 15)
+    .attr("x", -50 )
+    .text("Y axis: Output Channel");
+    
+    
+//map data to colormap
+    row.selectAll(".cell")
+        .data(function(d, i) { 
+            return d ; 
+         })
+        .style("fill", colorMap)
+        .append("title")
+        .text(function(d, i) {  
+      return  "weight value: "+d ; });
 }
 
 /****************************************************** 
