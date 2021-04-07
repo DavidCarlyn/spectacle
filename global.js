@@ -77,18 +77,22 @@ function draw(moduleData) {
  * TODO: Test and debug
 *******************************************************/
 function drawBatchNorm2d(data) {
-    //console.log(currentDesign + ' design not implemented');
-    
     // *** Assumes data is a matrix with one row and many columns *** //
 
     // SVG parameters
-    let n_features = data[0].length
-    let width_per_feature = 100;
-    let height = 500;
-    let width = width_per_feature*n_features;
+    let n_features = data.data.num_features
+    let padding = 10;
+    let width_per_feature = 20;
+    let height = 200;
+    let width = width_per_feature * n_features + padding * n_features;
     
-    var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
-        y = d3.scaleLinear().rangeRound([height, 0]);
+    const x = d3.scaleLinear()
+        .domain([0, n_features])
+        .range([0, width]);
+
+    const y = d3.scaleLinear()
+        .domain([0, d3.max([Math.abs(d3.min(data.data.weight)), d3.max(data.data.weight)])])
+        .range([height, 0]);
     
     // SVG initialize
     var svg = d3.select('#' + SVG_ID)
@@ -98,9 +102,6 @@ function drawBatchNorm2d(data) {
         
     // Set up graph in SVG
     var g = svg.append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-    x.domain([1,length(data[0])]);
-    y.domain([d3.min(data[0], d3.max(data[0]))]);
     
     //
     g.append("g")
@@ -118,26 +119,21 @@ function drawBatchNorm2d(data) {
       .text("Weight Size");
 
     g.selectAll(".bar")
-      .data(data)
+      .data(data.data.weight)
       .enter().append("rect")
       .attr("class", "bar")
-      .attr("x", Array(8).fill().map((data[0], index) => index + 1))
-      .attr("y", data[0])
-      .attr("width", x.bandwidth())
-      .attr("height", function(d) { return height - data[0]; });
+      .attr("x", (d, i) => x(i))
+      .attr("y", d => y(Math.abs(d)))
+      .attr("width", width_per_feature)
+      .attr("height", d => height - y(Math.abs(d)));
     
     // Define color scale for positive to negative weights
-        // blue to orange best for red-green color blindness 
-    var colorScale = d3.scale.ordinal()
-    .domain(d3.range(n_features))
-    .range(["blue","orange"])
-    
+    // blue to orange best for red-green color blindness 
+    // Setting rect titles
     g.selectAll(".bar")
-      .data(function(d, i) { 
-              return d; })
-      .style("fill", colorMap)
+      .style("fill", d => d > 0 ? "blue" : "orange")
       .append("title")
-      .text(function(d, i) {  return  "Weight Value: " + d; })
+      .text((d, i) => "Weight Value: " + d)
 }
 
 /****************************************************** 
