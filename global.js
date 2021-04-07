@@ -74,10 +74,70 @@ function draw(moduleData) {
  * Function for handling the batch normalization layer
  * drawing.
  * 
- * TODO: NOT STARTED
+ * TODO: Test and debug
 *******************************************************/
 function drawBatchNorm2d(data) {
-    console.log(currentDesign + ' design not implemented');
+    //console.log(currentDesign + ' design not implemented');
+    
+    // *** Assumes data is a matrix with one row and many columns *** //
+
+    // SVG parameters
+    let n_features = data[0].length
+    let width_per_feature = 100;
+    let height = 500;
+    let width = width_per_feature*n_features;
+    
+    var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
+        y = d3.scaleLinear().rangeRound([height, 0]);
+    
+    // SVG initialize
+    var svg = d3.select('#' + SVG_ID)
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+        
+    // Set up graph in SVG
+    var g = svg.append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    x.domain([1,length(data[0])]);
+    y.domain([d3.min(data[0], d3.max(data[0]))]);
+    
+    //
+    g.append("g")
+      .attr("class", "axis axis--x")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+      
+    g.append("g")
+      .attr("class", "axis axis--y")
+      .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", "0.71em")
+      .attr("text-anchor", "end")
+      .text("Weight Size");
+
+    g.selectAll(".bar")
+      .data(data)
+      .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", Array(8).fill().map((data[0], index) => index + 1))
+      .attr("y", data[0])
+      .attr("width", x.bandwidth())
+      .attr("height", function(d) { return height - data[0]; });
+    
+    // Define color scale for positive to negative weights
+        // blue to orange best for red-green color blindness 
+    var colorScale = d3.scale.ordinal()
+    .domain(d3.range(n_features))
+    .range(["blue","orange"])
+    
+    g.selectAll(".bar")
+      .data(function(d, i) { 
+              return d; })
+      .style("fill", colorMap)
+      .append("title")
+      .text(function(d, i) {  return  "Weight Value: " + d; })
 }
 
 /****************************************************** 
@@ -91,7 +151,7 @@ function drawLinear(data) {
     weight_matrix = data["data"]["weight"] ;
     let width = 3072 ; //512*6
     let height = 6000;  //1000*6
-    var margin = {top: 30, right: 30, bottom: 30, left: 30} ; 
+    var margin = {top: 30, right: 30, bottom: 30, left: 30}; 
 
     var numcols = weight_matrix[1].length;//512
     var numrows = weight_matrix.length; //1000
