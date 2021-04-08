@@ -227,7 +227,9 @@ var x_axis= svg.selectAll(".x_axis")
 x_axis.append("text")
     .attr("text-anchor", "start")
     .style("font-size",  3)
-    .text(function(d, i) { return d; }); 
+    .text(function(d, i) {
+        return i % 20 == 0 ? d : ""; 
+    }); 
 
 
 //y axis 
@@ -239,7 +241,9 @@ x_axis.append("text")
     y_axis.append("text")
     .attr("text-anchor", "start")
     .style("font-size",  3)
-    .text(function(d, i) { return d; });
+    .text(function(d, i) {
+        return i % 20 == 0 ? d : ""; 
+    }); 
 
 //x,y  axis title
 svg.append("text")
