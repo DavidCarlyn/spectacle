@@ -77,7 +77,7 @@ def create_model_graph(module, parent):
             parent.add_child(node)
 
 if __name__ == "__main__":
-    model = models.resnet18(pretrained=False)
+    model = models.resnet18(pretrained=True)
     graph = NN_Node("root")
     print("Creating Graph")
     create_model_graph(model, graph)
