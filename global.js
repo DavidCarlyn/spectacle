@@ -278,8 +278,10 @@ svg.append("text")
  * TODO: Clean up / stylize
  * TODO: Add legend
  * TODO: Make size react to user window size
+ * TODO: Add X-axis
+ * TODO: Add Y-axis
+ * TODO: Add title
  * TODO: Create tooltip per cell
- * TODO: Create a highlight mechanism for mouseover a cell
 *******************************************************/
 function drawConv2d(data) {
     let cellSize = 40;
@@ -287,9 +289,9 @@ function drawConv2d(data) {
     let borderColor = "black";
     let margin = 50;
 
-    let kernelWidth = cellSize * data.data.kernel_size[0] + cellBorder * (data.data.kernel_size[0] + 1) // Kernel Size
+    let kernelWidth = cellSize * data.data.kernel_size[0] + (cellBorder * 2) * (data.data.kernel_size[0] + 1) // Kernel Size
     let width = kernelWidth * data.data.in_channels + (margin - 1) * data.data.in_channels // In Channel
-    let kernelHeight = cellSize * data.data.kernel_size[1] + cellBorder * (data.data.kernel_size[1] + 1) // Kernel Size
+    let kernelHeight = cellSize * data.data.kernel_size[1] + (cellBorder * 2) * (data.data.kernel_size[1] + 1) // Kernel Size
     let height = kernelHeight * data.data.out_channels + (margin - 1) * data.data.out_channels // In Channel
 
     var svg = d3.select('#' + SVG_ID)
@@ -332,7 +334,7 @@ function drawConv2d(data) {
             .data(data.kernel)
             .enter().append("g")
             .attr("class", "kernel_row")
-            .attr("transform", (d, i) => "translate(0, " + (i * cellSize + i * cellBorder) + ")")
+            .attr("transform", (d, i) => "translate(0, " + (i * cellSize + i * (cellBorder * 2)) + ")")
             .each(drawKernelCells);
     }
 
@@ -342,14 +344,20 @@ function drawConv2d(data) {
             .data(data)
             .enter().append("rect")
             .attr("class", "kernel_cell")
-            .attr("x", (d, i) => i * cellSize + i * cellBorder)
+            .attr("x", (d, i) => i * cellSize + i * (cellBorder * 2))
             .attr("width", cellSize)
             .attr("height", cellSize)
             .style("fill", d => COLORS(d))
             .style("stroke", borderColor)
             .style("stroke-width", cellBorder)
-            .on("mouseover", (evt, d) => createToolTip(evt, "Value: " + d))
-            .on("mouseout", (evt, d) => removeToolTip());
+            .on("mouseover", (evt, d) => {
+                evt.target.id = "active"
+                createToolTip(evt, "Value: " + d)
+            })
+            .on("mouseout", (evt, d) => {
+                evt.target.id = ""
+                removeToolTip()
+            });
     }
 }
 
