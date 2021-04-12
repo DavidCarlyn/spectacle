@@ -330,7 +330,9 @@ function drawConv2d(data) {
     let kernelHeight = cellSize * data.data.kernel_size[1] + (cellBorder * 2) * (data.data.kernel_size[1] + 1); // Kernel Size
     let height = kernelHeight * data.data.out_channels + (margin - 1) * data.data.out_channels
         + titleHeight + bottomTitleMargin
-        + legendHeight + bottomLegendMargin;
+        + legendHeight + bottomLegendMargin
+        + FONT_SIZE * 4 // For Axis Labels
+        + 50; //Extra padding on bottom
 
     var svg = d3.select('#' + SVG_ID)
         .append("svg")
