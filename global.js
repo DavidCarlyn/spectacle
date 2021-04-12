@@ -229,7 +229,7 @@ function drawLinear(data) {
     .attr("height", y.rangeBand())
     .style("stroke-width", 1);
 
-//x axis
+
 
 var x_axis= svg.selectAll(".x_axis")
     .data(x_label)
@@ -248,7 +248,7 @@ x_axis.append("text")
    var y_axis = svg.selectAll(".y_axis")
     .data(y_label)
     .enter().append("g")
-    .attr("transform", function(d, i) {  var temp=y(i)+4; return "translate(30, " + temp +")"; }); 
+    .attr("transform", function(d, i) {  var temp=y(i)+4; return "translate(30, " + temp +")"; }); //25
 
     y_axis.append("text")
     .attr("text-anchor", "start")
@@ -296,7 +296,6 @@ svg.append("text")
  * drawing.
  * 
  * TODO: Make size react to user window size
- * TODO: Create tooltip per cell
 *******************************************************/
 function drawConv2d(data) {
     let borderRadius = 4;
@@ -470,7 +469,6 @@ function drawConv2d(data) {
  * Function for handling the architectur drawing.
  * 
  * TODO: Center Text
- * TODO: Add Labels to container nodes (upper left corner)
  * TODO: Fix mouseover for leaves with text (highlight goes away)
 *******************************************************/
 async function drawArchitecture() {
@@ -510,6 +508,15 @@ async function drawArchitecture() {
         .attr("rx", borderRadius)
         .attr("ry", borderRadius)
         .append("title").text((d, i) => d.name);
+
+    // Draw Container text
+    svg.selectAll("rect_container_text")
+        .data(containers)
+        .enter().append("text")
+        .attr("x", (d, i) => d.drawVars.x)
+        .attr("y", (d, i) => d.drawVars.y - 4)
+        .attr("font-size", FONT_SIZE + "px")
+        .text((d, i) => d.name)
     
     // Draw Leaves
     svg.selectAll("rect_leaves")
