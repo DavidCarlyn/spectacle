@@ -314,7 +314,7 @@ function drawConv2d(data) {
     const TITLE_TEXT = "Convolutional Layer Visualization";
     let titleHeight = 50;
     let bottomTitleMargin = 30;
-    let extraPadding = 80;
+    let extraPadding = 10;
 
     let weights = data.data.weight;
 
@@ -328,9 +328,9 @@ function drawConv2d(data) {
         .range(range);
 
     let kernelWidth = cellSize * data.data.kernel_size[0] + (cellBorder * 2) * (data.data.kernel_size[0] + 1); // Kernel Size
-    let width = Math.max(kernelWidth * data.data.in_channels + (margin - 1) * data.data.in_channels + extraPadding, screen.width)
+    let width = Math.max(kernelWidth * data.data.in_channels + margin * data.data.in_channels + extraPadding, screen.width)
     let kernelHeight = cellSize * data.data.kernel_size[1] + (cellBorder * 2) * (data.data.kernel_size[1] + 1); // Kernel Size
-    let height = kernelHeight * data.data.out_channels + (margin - 1) * data.data.out_channels
+    let height = kernelHeight * data.data.out_channels + margin * data.data.out_channels
         + titleHeight + bottomTitleMargin
         + legendHeight + bottomLegendMargin
         + FONT_SIZE * 4 // For Axis Labels
@@ -457,7 +457,7 @@ async function drawArchitecture() {
     if (modelData === null) {
         modelData = await getData();
     }
-    
+
     let containers = modelData[0];
     let leaves = modelData[1];
     let arrows = modelData[2];
