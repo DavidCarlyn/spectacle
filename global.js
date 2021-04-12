@@ -143,7 +143,6 @@ function drawBatchNorm2d(data) {
 *******************************************************/
 function drawLinear(data) {
     //console.log(currentDesign + ' design not implemented');
-     //console.log(currentDesign + ' design not implemented');
     weight_matrix = data["data"]["weight"] ;
     let width = 3072 ; //512*6
     let height = 6000;  //1000*6
@@ -196,10 +195,10 @@ function drawLinear(data) {
         y_label.push(i) ; 
     }
 
-    //FIXME: will change later 
+     
     var colorMap = d3.scale.linear()
-    .domain([min,0.02, max])
-    .range(["white", "blue", "red"]); 
+    .domain([min,0.0, max])
+    .range(["blue", "white", "red"]); 
 
 
     var row = svg.selectAll(".row")
@@ -222,13 +221,13 @@ function drawLinear(data) {
 var x_axis= svg.selectAll(".x_axis")
     .data(x_label)
     .enter().append("g")
-    .attr("transform", function(d, i) { return "translate(" + x(i) + ", 25)"; });
+    .attr("transform", function(d, i) { return "translate(" + x(i) + ", 30)"; });
 
 x_axis.append("text")
     .attr("text-anchor", "start")
-    .style("font-size",  3)
+    .style("font-size",  8)
     .text(function(d, i) {
-        return i % 20 == 0 ? d : ""; 
+        return i % 10 == 0 ? d : ""; 
     }); 
 
 
@@ -236,27 +235,27 @@ x_axis.append("text")
    var y_axis = svg.selectAll(".y_axis")
     .data(y_label)
     .enter().append("g")
-    .attr("transform", function(d, i) {  var temp=y(i)+4; return "translate(25, " + temp +")"; });
+    .attr("transform", function(d, i) {  var temp=y(i)+4; return "translate(15, " + temp +")"; }); //25
 
     y_axis.append("text")
     .attr("text-anchor", "start")
-    .style("font-size",  3)
+    .style("font-size",  8)
     .text(function(d, i) {
-        return i % 20 == 0 ? d : ""; 
+        return i % 10 == 0 ? d : ""; 
     }); 
 
 //x,y  axis title
 svg.append("text")
     .attr("text-anchor", "end")
-    .attr("x", 200)
+    .attr("x", 120)
     .attr("y", 20 )
-    .text("X axis: Input Channel");
+    .text(" Input Channel");
 svg.append("text")
     .attr("text-anchor", "end")
     .attr("transform", "rotate(-90)")
     .attr("y", 15)
     .attr("x", -50 )
-    .text("Y axis: Output Channel");
+    .text(" Output Channel");
     
     
 //map data to colormap
@@ -265,9 +264,11 @@ svg.append("text")
             return d ; 
          })
         .style("fill", colorMap)
-        .append("title")
+     /*   .append("title")
         .text(function(d, i) {  
-      return  "weight value: "+d ; });
+      return  "weight value: "+d ; }); */
+        .on("mouseover", (evt, d) => createToolTip(evt, "Weight Value: " + d))
+        .on("mouseout", (evt, d) => removeToolTip());
 }
 
 /****************************************************** 
