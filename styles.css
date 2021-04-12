@@ -18,3 +18,7 @@
 .leaf#active:active {
     fill: rgb(2, 189, 189) !important;
 }
+
+#active.kernel_cell {
+    stroke: blue !important;
+}
