@@ -352,7 +352,6 @@ function drawConv2d(data) {
 /****************************************************** 
  * Function for handling the architectur drawing.
  * 
- * TODO: Center architecture
  * TODO: Draw arrows between modules
  * TODO: Center Text
  * TODO: Fix mouseover for leaves with text (highlight goes away)
@@ -517,33 +516,49 @@ function calcDrawVars(node, position) {
     node.drawVars.height = height
 }
 
+function centerNodes(node) {
+    const parentY = node.drawVars.y;
+    const parentHeight = node.drawVars.height;
+
+    // Set centered y position for children then recursively call
+    node.children.forEach(child => {
+        var offset = Math.round((parentHeight - child.drawVars.height) / 2)
+        child.drawVars.y = parentY + offset
+        centerNodes(child) // Recursion
+    });
+}
+
 /****************************************************** 
  * TODO: Document
 *******************************************************/
 async function getData() {
-    var leaves = []
-    var containers = []
+    var leaves = [];
+    var containers = [];
+    
     // Load Data
     let data = await d3.json("resnet18_weights.json");
 
     // Calculate Draw Variables
-    console.log("Calculating Draw Variables")
-    calcDrawVars(data, { x: 0, y: 0 })
-    console.log("Finished Calculating Draw Variables")
+    console.log("Calculating Draw Variables");
+    calcDrawVars(data, { x: 0, y: 0 });
+    console.log("Finished Calculating Draw Variables");
+
+    // Center Draw Variables along y
+    centerNodes(data);
 
     // Bredth-First Traversal
-    containers.push(data)
-    var stackOuter = [...data.children]
+    containers.push(data);
+    var stackOuter = [...data.children];
     while (stackOuter.length > 0) {
-        var stackInner = [...stackOuter]
-        stackOuter = []
+        var stackInner = [...stackOuter];
+        stackOuter = [];
         while (stackInner.length > 0) {
-            node = stackInner.shift() // pop from front
+            node = stackInner.shift(); // pop from front
             if (node.children.length > 0) {
-                stackOuter.push(...node.children)
-                containers.push(node)
+                stackOuter.push(...node.children);
+                containers.push(node);
             } else {
-                leaves.push(node)
+                leaves.push(node);
             }
         }
     }
