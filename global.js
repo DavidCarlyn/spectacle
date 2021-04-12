@@ -352,7 +352,6 @@ function drawConv2d(data) {
 /****************************************************** 
  * Function for handling the architectur drawing.
  * 
- * TODO: Draw arrows between modules
  * TODO: Center Text
  * TODO: Fix mouseover for leaves with text (highlight goes away)
 *******************************************************/
@@ -363,8 +362,9 @@ async function drawArchitecture() {
     
     //! Obtaining data
     data = await getData();
-    let containers = data[0]
-    let leaves = data[1]
+    let containers = data[0];
+    let leaves = data[1];
+    let arrows = data[2];
     
     //Toggle Loading Image
     toggleLoadingImage();
@@ -430,6 +430,33 @@ async function drawArchitecture() {
         .attr("y", (d, i) => d.drawVars.y + LEAF_PADDING + FONT_SIZE)
         .attr("font-size", FONT_SIZE + "px")
         .text((d, i) => d.name)
+
+    // Defining Arrow Head
+    svg.append('defs').append('marker')
+        .attr('id','arrow_head')
+        .attr('viewBox', '-0 -5 10 10')
+        .attr('refX', 10)
+        .attr('refY', 0)
+        .attr('markerWidth', 6)
+        .attr('markerHeight', 6)
+        .attr('orient', 'auto')
+        .attr('xoverflow', 'visible')
+        .append('svg:path')
+            .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
+            .attr('fill', 'black')
+            .style('stroke','none');
+
+    // Draw Arrows
+    svg.selectAll("arrows")
+        .data(arrows)
+        .enter().append("line")
+        .attr("x1", d => d.x1)
+        .attr("y1", d => d.y1)
+        .attr("x2", d => d.x2)
+        .attr("y2", d => d.y2)
+        .attr("stroke", "black")
+        .attr("stroke-width", 2)
+        .attr("marker-end", "url(#arrow_head)");
 
 }
 
@@ -516,15 +543,20 @@ function calcDrawVars(node, position) {
     node.drawVars.height = height
 }
 
-function centerNodes(node) {
+function centerNodesAndSetNext(node) {
     const parentY = node.drawVars.y;
     const parentHeight = node.drawVars.height;
 
-    // Set centered y position for children then recursively call
-    node.children.forEach(child => {
-        var offset = Math.round((parentHeight - child.drawVars.height) / 2)
-        child.drawVars.y = parentY + offset
-        centerNodes(child) // Recursion
+    // Set centered y position for children & set next, then recursively call
+    node.children.forEach((child, i) => {
+        var offset = Math.round((parentHeight - child.drawVars.height) / 2);
+        child.drawVars.y = parentY + offset;
+        centerNodesAndSetNext(child); // Recursion
+        if (i < node.children.length-1) {
+            child.next = node.children[i+1].drawVars;
+        } else {
+            child.next = null;
+        }
     });
 }
 
@@ -543,17 +575,28 @@ async function getData() {
     calcDrawVars(data, { x: 0, y: 0 });
     console.log("Finished Calculating Draw Variables");
 
-    // Center Draw Variables along y
-    centerNodes(data);
+    // Center Draw Variables along y & set next
+    centerNodesAndSetNext(data);
 
-    // Bredth-First Traversal
+    var arrows = [];
+
+    // Bredth-First Traversal    
     containers.push(data);
+    data.next = null;
     var stackOuter = [...data.children];
     while (stackOuter.length > 0) {
         var stackInner = [...stackOuter];
         stackOuter = [];
         while (stackInner.length > 0) {
             node = stackInner.shift(); // pop from front
+            if (node.next !== null) {
+                arrows.push({
+                    x1 : node.drawVars.x + node.drawVars.width, 
+                    y1 : node.drawVars.y + Math.round(node.drawVars.height / 2), 
+                    x2 : node.next.x,
+                    y2 : node.next.y + Math.round(node.next.height / 2), 
+                });
+            }
             if (node.children.length > 0) {
                 stackOuter.push(...node.children);
                 containers.push(node);
@@ -563,7 +606,7 @@ async function getData() {
         }
     }
 
-    return [containers, leaves];
+    return [containers, leaves, arrows];
 }
 
 /****************************************************** 
