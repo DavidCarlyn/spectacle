@@ -282,8 +282,9 @@ svg.append("text")
  * TODO: Create a highlight mechanism for mouseover a cell
 *******************************************************/
 function drawConv2d(data) {
-    let cellSize = 20;
+    let cellSize = 40;
     let cellBorder = 1;
+    let borderColor = "black";
     let margin = 50;
 
     let kernelWidth = cellSize * data.data.kernel_size[0] + cellBorder * (data.data.kernel_size[0] + 1) // Kernel Size
@@ -304,7 +305,7 @@ function drawConv2d(data) {
 
     const COLORS = d3.scaleLinear()
         .domain([min, 0, max])
-        .range(["#ff1414", "#ffffff", "#08c718"]);
+        .range(["#ff0000", "#ffffff", "#00ff00"]);
 
     // Setting up data to be drawn
     weights = []
@@ -345,6 +346,8 @@ function drawConv2d(data) {
             .attr("width", cellSize)
             .attr("height", cellSize)
             .style("fill", d => COLORS(d))
+            .style("stroke", borderColor)
+            .style("stroke-width", cellBorder)
             .on("mouseover", (evt, d) => createToolTip(evt, "Value: " + d))
             .on("mouseout", (evt, d) => removeToolTip());
     }
