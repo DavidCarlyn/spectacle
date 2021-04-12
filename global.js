@@ -166,7 +166,7 @@ function drawLinear(data) {
 
     let width = 3072 ; //512*6
     let height = 6000;  //1000*6
-    var margin = {top: 30, right: 30, bottom: 30, left: 30}; 
+    var margin = {top: 60, right: 60, bottom: 60, left: 60}; 
 
    
 
@@ -183,11 +183,11 @@ function drawLinear(data) {
 
     var x = d3.scale.ordinal()
     .domain(d3.range(numcols))
-    .rangeBands([30, width+ margin.left]);
+    .rangeBands([60, width+ margin.left]);
 
     var y = d3.scale.ordinal()
     .domain(d3.range(numrows))
-    .rangeBands([30, height+ margin.top]);
+    .rangeBands([60, height+ margin.top]);
     
     //find max/min weight value
     /*min = weight_matrix[0][0] ; 
@@ -229,12 +229,12 @@ function drawLinear(data) {
     .attr("height", y.rangeBand())
     .style("stroke-width", 1);
 
-
+//x axis
 
 var x_axis= svg.selectAll(".x_axis")
     .data(x_label)
     .enter().append("g")
-    .attr("transform", function(d, i) { return "translate(" + x(i) + ", 30)"; });
+    .attr("transform", function(d, i) { return "translate(" + x(i) + ", 50)"; });
 
 x_axis.append("text")
     .attr("text-anchor", "start")
@@ -248,7 +248,7 @@ x_axis.append("text")
    var y_axis = svg.selectAll(".y_axis")
     .data(y_label)
     .enter().append("g")
-    .attr("transform", function(d, i) {  var temp=y(i)+4; return "translate(15, " + temp +")"; }); //25
+    .attr("transform", function(d, i) {  var temp=y(i)+4; return "translate(30, " + temp +")"; }); 
 
     y_axis.append("text")
     .attr("text-anchor", "start")
@@ -287,7 +287,7 @@ svg.append("text")
         .data(function(d, i) { 
             return d ; 
          })
-        .on("mouseover", (evt, d) => createToolTip(evt,"weight value: "+d[0] + " Input channel#: "+ d[1]+" Ouput channel#: "+ d[2]))
+        .on("mouseover", (evt, d) => createToolTip(evt,"weight value: "+d[0] + "<br> Input channel#: "+ d[1]+"<br> Ouput channel#: "+ d[2]))
         .on("mouseout", (evt, d) => removeToolTip()); 
 }
 
