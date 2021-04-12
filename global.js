@@ -74,25 +74,31 @@ function draw(moduleData) {
 /****************************************************** 
  * Function for handling the batch normalization layer
  * drawing.
- * 
- * TODO: Test and debug
 *******************************************************/
 function drawBatchNorm2d(data) {
     // *** Assumes data is a matrix with one row and many columns *** //
 
-    // SVG parameters
+    // Variables
+    let titleHeight = 50;
+    let bottomTitleMargin = 50;
+    let labelSpace = 50;
     let n_features = data.data.num_features
     let padding = 10;
     let width_per_feature = 20;
-    let height = 200;
-    let width = width_per_feature * n_features + padding * n_features;
+    let maxBarHeight = 200;
+    let height = maxBarHeight + titleHeight + bottomTitleMargin + labelSpace;
+    let barChartWidth = width_per_feature * n_features + padding * n_features;
+    let width = barChartWidth + labelSpace;
+
+    let min = d3.min(data.data.weight);
+    let max = d3.max(data.data.weight);
     
     const x = d3.scaleLinear()
         .domain([0, n_features])
-        .range([0, width]);
+        .range([0, barChartWidth]);
 
     const y = d3.scaleLinear()
-        .domain([0, d3.max([Math.abs(d3.min(data.data.weight)), d3.max(data.data.weight)])])
+        .domain([0, d3.max([Math.abs(min), max])])
         .range([height, 0]);
     
     // SVG initialize
@@ -102,84 +108,86 @@ function drawBatchNorm2d(data) {
         .attr("height", height);
         
     // Create Title
-    let titleHeight = 50;
     const title = svg.append("text")
         .attr("x", 0)
         .attr("y", titleHeight)
         .attr("font-size", titleHeight + "px")
         .text("Batch2dNorm Layer");
 
-    // Create Legend
-    let legendHeight = 50;
-    createLegend(svg, 0, titleHeight + 20, legendHeight, screen.width * 0.9, [d3.min(data.data.weight), d3.max(data.data.weight)], ['orange','blue'], 10, 2, 10, 4);
-        
     // Set up graph in SVG
     var g = svg.append("g")
-    
-    x_label='Features'
-    var x_axis = svg.selectAll(".x_axis")
-    .data(x_label)
-    .enter().append("g")
-    .attr("transform", function(d, i) { return "translate(" + x(i) + ", " + (margin.top - 10) + ")"; });
-
-    x_axis.append("text")
-    .attr("text-anchor", "start")
-    .style("font-size",  8)
-    .text(function(d, i) {
-        return (i + 1) % 10 == 0 || i == 0 ? d+1 : ""; 
-    }); 
-
-
-//y axis 
-   y_label = 'Magnitude of Weight'
-   var y_axis = svg.selectAll(".y_axis")
-    .data(y_label)
-    .enter().append("g")
-    .attr("transform", function(d, i) {  var temp=y(i)+4; return "translate(30, " + temp +")"; }); //25
-
-    y_axis.append("text")
-    .attr("text-anchor", "start")
-    .style("font-size",  8)
-    .text(function(d, i) {
-        return (i + 1) % 10 == 0 || i == 0 ? d+1 : "";
-    }); 
-
-//x,y  axis title
-svg.append("text")
-    .attr("text-anchor", "end")
-    .attr("x", 140)
-    .attr("y", margin.top - 40)
-    .text("Features");
-
-svg.append("text")
-    .attr("text-anchor", "end")
-    .attr("transform", "rotate(-90)")
-    .attr("y", 15)
-    .attr("x", -margin.top)
-    .text("Magnitude of Weight");
+        .attr("transform", "translate(" + labelSpace + ", " + (titleHeight + bottomTitleMargin) + ")");
 
     g.selectAll(".bar")
-      .data(data.data.weight)
-      .enter().append("rect")
-      .attr("class", "bar")
-      .attr("x", (d, i) => x(i))
-      .attr("y", d => y(Math.abs(d)))
-      .attr("width", width_per_feature)
-      .attr("height", d => height - y(Math.abs(d)));
+        .data(data.data.weight)
+        .enter().append("rect")
+        .attr("class", "bar")
+        .attr("x", (d, i) => x(i))
+        .attr("y", d => y(Math.abs(d)))
+        .attr("width", width_per_feature)
+        .attr("height", d => maxBarHeight - y(Math.abs(d)))
+        .style("fill", d => d > 0 ? "blue" : "orange")
+        .style("stroke", "black")
+        .style("stroke-width", 2)
+        .on("mouseover", (evt, d) => {
+            evt.target.id = "active"
+            text = "<strong>Value</strong>: " + d + "<br>"
+            createToolTip(evt, text)
+        })
+        .on("mouseout", (evt, d) => {
+            evt.target.id = ""
+            removeToolTip()
+        });
     
-    // Define color scale for positive to negative weights
-    // blue to orange best for red-green color blindness 
-    // Setting rect titles
-    g.selectAll(".bar")
-      .style("fill", d => d > 0 ? "blue" : "orange")
-      .append("title")
-      .text((d, i) => "Weight Value: " + d)
+
+    // X-Axis Labels
+    let xLabelG = svg.append("g")
+        .attr("transform", "translate(" + labelSpace + ", " + (titleHeight + bottomTitleMargin + maxBarHeight) + ")")
+    
+    let xLabels = xLabelG.selectAll(".x_axis")
+        .data(data.data.weight)
+        .enter().append("text")
+        .attr("font-size", FONT_SIZE + "px")
+        .attr("x", (d, i) => (i + 0.5) * width_per_feature + (i * padding) - FONT_SIZE/2)
+        .attr("y", FONT_SIZE + 6)
+        .text((d, i) => i+1)
+    
+    let xTitle = xLabelG.append("text")
+        .attr("font-size", FONT_SIZE + "px")
+        .attr("x", 0)
+        .attr("y", FONT_SIZE * 2 + 12)
+        .text("Feature Number")
+
+    // Y-Axis Labels
+    let yLabelG = svg.append("g")
+        .attr("transform", "translate(" + 0 + ", " + (titleHeight + bottomTitleMargin) + ")")
+    
+    let yLabels = yLabelG.selectAll(".y_axis")
+        .data([0, maxBarHeight])
+        .enter().append("text")
+        .attr("font-size", FONT_SIZE + "px")
+        .attr("x", 20)
+        .attr("y", d => d)
+        .text((d, i) => {
+            console.log(d)
+            if (d == 0) return max.toFixed(4);
+            else if (d == maxBarHeight) return 0;
+
+            return "";
+        });
+    
+    let yTitleText = "Magnitude of Weight Value";
+    let yTitle = yLabelG.append("text")
+        .attr("font-size", FONT_SIZE + "px")
+        .attr("text-anchor", "end")
+        .attr("transform", "rotate(-90)")
+        .attr("x",  0)
+        .attr("y", FONT_SIZE)
+        .text(yTitleText);
 }
 
 /****************************************************** 
  * Function for handling the Linear layer drawing
- * 
- * TODO: NOT STARTED
 *******************************************************/
 function drawLinear(data) {
     //console.log(currentDesign + ' design not implemented');
@@ -430,6 +438,7 @@ function drawConv2d(data) {
     var xLabels = svg.selectAll(".x_labels")
         .data(d3.range(data.data.in_channels))
         .enter().append("text")
+        .attr("font-size", FONT_SIZE + "px")
         .attr("x", d => xMargin + (d + 0.5) * kernelWidth + d * margin - FONT_SIZE/2)
         .attr("y", xAxisY)
         .text(d => d+1)
@@ -438,6 +447,7 @@ function drawConv2d(data) {
     var xLabels = svg.selectAll(".y_labels")
         .data(d3.range(data.data.out_channels))
         .enter().append("text")
+        .attr("font-size", FONT_SIZE + "px")
         .attr("x", 0)
         .attr("y", d => yMargin + (d + 0.5) * kernelHeight + d * margin + FONT_SIZE/2)
         .text(d => d+1)

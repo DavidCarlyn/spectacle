@@ -22,3 +22,7 @@
 #active.kernel_cell {
     stroke: blue !important;
 }
+
+#active.bar {
+    stroke: red !important;
+}
