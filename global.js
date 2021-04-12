@@ -160,35 +160,7 @@ function drawLinear(data) {
         }
         data.push(temp); 
     }
-     
 
-
-
-    let width = 3072 ; //512*6
-    let height = 6000;  //1000*6
-    var margin = {top: 60, right: 60, bottom: 60, left: 60}; 
-
-   
-
-    var svg = d3.select('#' + SVG_ID)
-        .append("svg")
-        .attr("width", width+margin.left)
-        .attr("height", height+ margin.top) ; 
-        
-
-    svg.append("rect")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    var x = d3.scale.ordinal()
-    .domain(d3.range(numcols))
-    .rangeBands([60, width+ margin.left]);
-
-    var y = d3.scale.ordinal()
-    .domain(d3.range(numrows))
-    .rangeBands([60, height+ margin.top]);
-    
     //find max/min weight value
     /*min = weight_matrix[0][0] ; 
     max = weight_matrix[0][0] ; 
@@ -203,15 +175,51 @@ function drawLinear(data) {
     }
     console.log(max, "  ", min) ;  */
 
-
     var max =0.043576840311288834 ; 
     var min = -0.04393909499049187 ; 
 
+    let colorDomain = [min,0.0, max]
+    let colorRange = ["blue", "white", "red"]
 
-     
+    let titleHeight = 50;
+    let legendHeight = 50;
+
+    let width = numcols * 6;
+    let height = numrows * 6;
+    var margin = {top: 60 + titleHeight + legendHeight + 20, right: 160, bottom: 120, left: 60}; 
+
+    var svg = d3.select('#' + SVG_ID)
+        .append("svg")
+        .attr("width", width+margin.left + margin.right)
+        .attr("height", height+ margin.top + margin.bottom) ; 
+
+    // Create Title
+    const title = svg.append("text")
+        .attr("x", 0)
+        .attr("y", titleHeight)
+        .attr("font-size", titleHeight + "px")
+        .text("Linear Layer Visualization");
+
+    // Create Legend
+    createLegend(svg, 0, titleHeight + 20, legendHeight, screen.width * 0.9, colorDomain, colorRange, 10, 2, 10, 4);
+        
+
+    svg.append("rect")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var x = d3.scale.ordinal()
+    .domain(d3.range(numcols))
+    .rangeBands([margin.left, width+ margin.left]);
+
+    var y = d3.scale.ordinal()
+    .domain(d3.range(numrows))
+    .rangeBands([margin.top, height+ margin.top]);
+    
     var colorMap = d3.scale.linear()
-    .domain([min,0.0, max])
-    .range(["blue", "white", "red"]); 
+    .domain(colorDomain)
+    .range(colorRange); 
 
 
     var row = svg.selectAll(".row")
@@ -234,7 +242,7 @@ function drawLinear(data) {
 var x_axis= svg.selectAll(".x_axis")
     .data(x_label)
     .enter().append("g")
-    .attr("transform", function(d, i) { return "translate(" + x(i) + ", 50)"; });
+    .attr("transform", function(d, i) { return "translate(" + x(i) + ", " + (margin.top - 10) + ")"; });
 
 x_axis.append("text")
     .attr("text-anchor", "start")
@@ -260,15 +268,16 @@ x_axis.append("text")
 //x,y  axis title
 svg.append("text")
     .attr("text-anchor", "end")
-    .attr("x", 120)
-    .attr("y", 20 )
-    .text(" Input Channel");
+    .attr("x", 140)
+    .attr("y", margin.top - 40)
+    .text("Input Channel");
+
 svg.append("text")
     .attr("text-anchor", "end")
     .attr("transform", "rotate(-90)")
     .attr("y", 15)
-    .attr("x", -50 )
-    .text(" Output Channel");
+    .attr("x", -margin.top)
+    .text("Output Channel");
     
     
 //map data to colormap
