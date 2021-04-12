@@ -295,17 +295,13 @@ svg.append("text")
  * Function for handling the convolutional layer
  * drawing.
  * 
- * TODO: Clean up / stylize
- * TODO: Add legend
  * TODO: Make size react to user window size
- * TODO: Add X-axis
- * TODO: Add Y-axis
- * TODO: Add title
  * TODO: Create tooltip per cell
 *******************************************************/
 function drawConv2d(data) {
+    let borderRadius = 4;
     let cellSize = 40;
-    let cellBorder = 1;
+    let cellBorder = 2;
     let borderColor = "black";
     let margin = 50;
     let legendHeight = 50;
@@ -355,7 +351,7 @@ function drawConv2d(data) {
 
 
     // Create Legend
-    createLegend(svg, xMargin, yMargin, legendHeight, legendWidth, domain, range, 10);
+    createLegend(svg, xMargin, yMargin, legendHeight, legendWidth, domain, range, 10, 2, 10, borderRadius);
     yMargin += legendHeight + bottomLegendMargin;
 
     // Setting up data to be drawn
@@ -428,6 +424,8 @@ function drawConv2d(data) {
             .attr("x", (d, i) => i * (cellSize + (cellBorder * 2)))
             .attr("width", cellSize)
             .attr("height", cellSize)
+            .attr("rx", borderRadius)
+            .attr("ry", borderRadius)
             .style("fill", d => COLORS(d))
             .style("stroke", borderColor)
             .style("stroke-width", cellBorder)
@@ -446,6 +444,7 @@ function drawConv2d(data) {
  * Function for handling the architectur drawing.
  * 
  * TODO: Center Text
+ * TODO: Add Labels to container nodes (upper left corner)
  * TODO: Fix mouseover for leaves with text (highlight goes away)
 *******************************************************/
 async function drawArchitecture() {
@@ -469,7 +468,8 @@ async function drawArchitecture() {
         .append("svg")
         .attr("width", containers[0].drawVars.width)
         .attr("height", containers[0].drawVars.height);
-
+        
+    let borderRadius = 4;
 
     // Draw Containers
     svg.selectAll("rect_containers")
@@ -481,6 +481,8 @@ async function drawArchitecture() {
         .attr("width",(d, i) => d.drawVars.width)
         .attr("x", (d, i) => d.drawVars.x)
         .attr("y", (d, i) => d.drawVars.y)
+        .attr("rx", borderRadius)
+        .attr("ry", borderRadius)
         .append("title").text((d, i) => d.name);
     
     // Draw Leaves
@@ -500,6 +502,8 @@ async function drawArchitecture() {
         })
         .attr("x", (d, i) => d.drawVars.x)
         .attr("y", (d, i) => d.drawVars.y)
+        .attr("rx", borderRadius)
+        .attr("ry", borderRadius)
         .on('click', (evt, d) => {
             currentDesign = getDesignFromString(d.name);
             if (currentDesign === DESIGNS.INVALID) {
@@ -563,7 +567,7 @@ async function drawArchitecture() {
 /****************************************************** 
  * TODO: Document
 *******************************************************/
-function createLegend(svg, x, y, height, width, domain, range, numOfRects=10, borderWidth=2, labelSpace=10) {
+function createLegend(svg, x, y, height, width, domain, range, numOfRects=10, borderWidth=2, labelSpace=10, borderRadius=0) {
     const SIGNIFICANT_DIGITS = 4;
     var xScale = d3.scaleLinear().domain([0, numOfRects]).range([x, x+width])
     var spread = []
@@ -585,7 +589,9 @@ function createLegend(svg, x, y, height, width, domain, range, numOfRects=10, bo
     // Create rect and fill
     rects.append("rect")
         .attr("x", d => xScale(d) + borderWidth)
-        .attr("y", borderWidth)
+        .attr("y", borderWidth + labelSpace)
+        .attr("rx", borderRadius)
+        .attr("ry", borderRadius)
         .attr("width", d => xScale(1)-(borderWidth*2))
         .attr("height", height - (borderWidth*2) - labelSpace)
         .attr("fill", d => colorScale(domainScale(d)))
@@ -595,7 +601,7 @@ function createLegend(svg, x, y, height, width, domain, range, numOfRects=10, bo
     // Add scale values to beginning, middle, and end
     rects.append("text")
         .attr("x", d => xScale(d) + xScale(1)/2 - SIGNIFICANT_DIGITS*FONT_SIZE/2)
-        .attr("y", height - (borderWidth*2) - labelSpace + FONT_SIZE)
+        .attr("y", 0)
         .attr("font-size", FONT_SIZE + "px")
         .text(d => domainScale(d).toFixed(SIGNIFICANT_DIGITS))
 }
