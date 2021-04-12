@@ -144,12 +144,30 @@ function drawBatchNorm2d(data) {
 function drawLinear(data) {
     //console.log(currentDesign + ' design not implemented');
     weight_matrix = data["data"]["weight"] ;
+    var numcols = weight_matrix[1].length;//512
+    var numrows = weight_matrix.length; //1000
+
+    //create data for visualizarion 
+    var data =[] ; 
+    var x_label = [], y_label=[] ; 
+    for (i=0; i<numrows; i++ ){
+        temp = [] ;
+        y_label.push(i)
+        for (j=0; j<numcols; j++){
+            temp.push([weight_matrix[i][j] , j, i ]) ; //weight, input channel, output channel
+            if(i==0){x_label.push(j) ;} 
+        }
+        data.push(temp); 
+    }
+     
+
+
+
     let width = 3072 ; //512*6
     let height = 6000;  //1000*6
     var margin = {top: 30, right: 30, bottom: 30, left: 30}; 
 
-    var numcols = weight_matrix[1].length;//512
-    var numrows = weight_matrix.length; //1000
+   
 
     var svg = d3.select('#' + SVG_ID)
         .append("svg")
@@ -183,17 +201,11 @@ function drawLinear(data) {
            }
     }
     console.log(max, "  ", min) ;  */
+
+
     var max =0.043576840311288834 ; 
     var min = -0.04393909499049187 ; 
 
-    //labels for x,y axis
-    var x_label = [], y_label=[] ; 
-    for(var i =0 ; i<numcols; i++){
-        x_label.push(i) ; 
-    }
-    for(var i =0 ; i<numrows; i++){
-        y_label.push(i) ; 
-    }
 
      
     var colorMap = d3.scale.linear()
@@ -202,7 +214,7 @@ function drawLinear(data) {
 
 
     var row = svg.selectAll(".row")
-    .data(weight_matrix)
+    .data(data)
     .enter().append("g")
     .attr("class", "row")
     .attr("transform", function(d, i) { return "translate(0," + y(i) + ")"; });
@@ -260,15 +272,22 @@ svg.append("text")
     
 //map data to colormap
     row.selectAll(".cell")
+        .data( function(d, i) { 
+            weight_data =[] ;
+            for(  j=0; j<512; j++){
+                weight_data.push(d[j][0]) ; 
+
+            }
+            return weight_data ;  
+         }  )
+        .style("fill", colorMap) ;
+
+    row.selectAll(".cell")
         .data(function(d, i) { 
             return d ; 
          })
-        .style("fill", colorMap)
-     /*   .append("title")
-        .text(function(d, i) {  
-      return  "weight value: "+d ; }); */
-        .on("mouseover", (evt, d) => createToolTip(evt, "Weight Value: " + d))
-        .on("mouseout", (evt, d) => removeToolTip());
+        .on("mouseover", (evt, d) => createToolTip(evt,"weight value: "+d[0] + " Input channel#: "+ d[1]+" Ouput channel#: "+ d[2]))
+        .on("mouseout", (evt, d) => removeToolTip()); 
 }
 
 /****************************************************** 
