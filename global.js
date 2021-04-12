@@ -397,7 +397,7 @@ function drawConv2d(data) {
         .enter().append("text")
         .attr("x", d => xMargin + (d + 0.5) * kernelWidth + d * margin - FONT_SIZE/2)
         .attr("y", xAxisY)
-        .text(d => d)
+        .text(d => d+1)
 
     // Draw Y-Axis Labels
     var xLabels = svg.selectAll(".y_labels")
@@ -405,7 +405,7 @@ function drawConv2d(data) {
         .enter().append("text")
         .attr("x", 0)
         .attr("y", d => yMargin + (d + 0.5) * kernelHeight + d * margin + FONT_SIZE/2)
-        .text(d => d)
+        .text(d => d+1)
 
     function drawKernels(data) {
         // Kernel Row
