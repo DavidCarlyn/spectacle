@@ -288,26 +288,52 @@ function drawConv2d(data) {
     let cellBorder = 1;
     let borderColor = "black";
     let margin = 50;
-
-    let kernelWidth = cellSize * data.data.kernel_size[0] + (cellBorder * 2) * (data.data.kernel_size[0] + 1) // Kernel Size
-    let width = kernelWidth * data.data.in_channels + (margin - 1) * data.data.in_channels // In Channel
-    let kernelHeight = cellSize * data.data.kernel_size[1] + (cellBorder * 2) * (data.data.kernel_size[1] + 1) // Kernel Size
-    let height = kernelHeight * data.data.out_channels + (margin - 1) * data.data.out_channels // In Channel
-
-    var svg = d3.select('#' + SVG_ID)
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height);
+    let legendHeight = 50;
+    let legendWidth = screen.width * 0.9;
+    let bottomLegendMargin = 30;
+    const TITLE_TEXT = "Convolutional Layer Visualization";
+    let titleHeight = 50;
+    let bottomTitleMargin = 30;
 
     let weights = data.data.weight;
 
     // Creating Colors
     let min = Math.min.apply(Math, weights.map(ic => Math.min.apply(Math, ic.map(oc => Math.min.apply(Math, oc.map(kw => Math.min.apply(Math, kw.map(kh => kh))))))));
     let max = Math.max.apply(Math, weights.map(ic => Math.max.apply(Math, ic.map(oc => Math.max.apply(Math, oc.map(kw => Math.max.apply(Math, kw.map(kh => kh))))))));
-
+    let domain = [min, 0, max];
+    let range = ["#ff0000", "#ffffff", "#00ff00"];
     const COLORS = d3.scaleLinear()
-        .domain([min, 0, max])
-        .range(["#ff0000", "#ffffff", "#00ff00"]);
+        .domain(domain)
+        .range(range);
+
+    let kernelWidth = cellSize * data.data.kernel_size[0] + (cellBorder * 2) * (data.data.kernel_size[0] + 1); // Kernel Size
+    let width = Math.max(kernelWidth * data.data.in_channels + (margin - 1) * data.data.in_channels, screen.width);
+    let kernelHeight = cellSize * data.data.kernel_size[1] + (cellBorder * 2) * (data.data.kernel_size[1] + 1); // Kernel Size
+    let height = kernelHeight * data.data.out_channels + (margin - 1) * data.data.out_channels
+        + titleHeight + bottomTitleMargin
+        + legendHeight + bottomLegendMargin;
+
+    var svg = d3.select('#' + SVG_ID)
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    var yMargin = 0;
+    var xMargin = 0;
+
+    // Create Title
+    const title = svg.append("text")
+        .attr("x", xMargin)
+        .attr("y", yMargin + titleHeight)
+        .attr("font-size", titleHeight + "px")
+        .text(TITLE_TEXT);
+
+    yMargin += titleHeight + bottomTitleMargin;
+
+
+    // Create Legend
+    createLegend(svg, xMargin, yMargin, legendHeight, legendWidth, domain, range, 10);
+    yMargin += legendHeight + bottomLegendMargin;
 
     // Setting up data to be drawn
     weights = []
@@ -321,12 +347,44 @@ function drawConv2d(data) {
         });
     });
 
+    // Description of axis
+    // Create Title
+    const axisLabels = svg.append("text")
+        .attr("x", xMargin)
+        .attr("y", yMargin + FONT_SIZE)
+        .attr("font-size", FONT_SIZE + "px")
+        .text("X-Axis: In Channels  |  Y-Axis: Out Channels");
+
+    yMargin += FONT_SIZE * 3;
+
+    // Give Room for xAxis & yAxis
+    var xAxisY = yMargin;
+    yMargin += FONT_SIZE;
+    xMargin += FONT_SIZE * 3;
+
+    // Draw Kernels
     var kernels = svg.selectAll(".kernel")
         .data(weights)
         .enter().append("g")
         .attr("class", "kernel")
-        .attr("transform", (d, i) => "translate(" + (d.in_channel * kernelWidth + d.in_channel * margin) + ", " + (d.out_channel * kernelHeight + d.out_channel * margin) + ")")
+        .attr("transform", (d, i) => "translate(" + (d.in_channel * (kernelWidth + margin) + xMargin) + ", " + (d.out_channel * (kernelHeight + margin) + yMargin) + ")")
         .each(drawKernels)
+
+    // Draw X-Axis Labels
+    var xLabels = svg.selectAll(".x_labels")
+        .data(d3.range(data.data.in_channels))
+        .enter().append("text")
+        .attr("x", d => xMargin + (d + 0.5) * kernelWidth + d * margin - FONT_SIZE/2)
+        .attr("y", xAxisY)
+        .text(d => d)
+
+    // Draw Y-Axis Labels
+    var xLabels = svg.selectAll(".y_labels")
+        .data(d3.range(data.data.out_channels))
+        .enter().append("text")
+        .attr("x", 0)
+        .attr("y", d => yMargin + (d + 0.5) * kernelHeight + d * margin + FONT_SIZE/2)
+        .text(d => d)
 
     function drawKernels(data) {
         // Kernel Row
@@ -334,7 +392,7 @@ function drawConv2d(data) {
             .data(data.kernel)
             .enter().append("g")
             .attr("class", "kernel_row")
-            .attr("transform", (d, i) => "translate(0, " + (i * cellSize + i * (cellBorder * 2)) + ")")
+            .attr("transform", (d, i) => "translate(0, " + (i * (cellSize + (cellBorder * 2))) + ")")
             .each(drawKernelCells);
     }
 
@@ -344,7 +402,7 @@ function drawConv2d(data) {
             .data(data)
             .enter().append("rect")
             .attr("class", "kernel_cell")
-            .attr("x", (d, i) => i * cellSize + i * (cellBorder * 2))
+            .attr("x", (d, i) => i * (cellSize + (cellBorder * 2)))
             .attr("width", cellSize)
             .attr("height", cellSize)
             .style("fill", d => COLORS(d))
@@ -479,6 +537,46 @@ async function drawArchitecture() {
 /****************************************************** 
  * TODO: Document
 *******************************************************/
+function createLegend(svg, x, y, height, width, domain, range, numOfRects=10, borderWidth=2, labelSpace=10) {
+    const SIGNIFICANT_DIGITS = 4;
+    var xScale = d3.scaleLinear().domain([0, numOfRects]).range([x, x+width])
+    var spread = []
+    for (var i = 0; i < domain.length; ++i) {
+        var ratio = i / (domain.length - 1);
+        spread.push(Math.round(ratio * (numOfRects-1)))
+    }
+    var domainScale = d3.scaleLinear().domain(spread).range(domain)
+    var colorScale = d3.scaleLinear()
+        .domain(domain)
+        .range(range);
+    
+    // Set Rect positions
+    var rects = svg.selectAll(".rect")
+        .data(d3.range(numOfRects))
+        .enter().append("g")
+        .attr("transform", "translate(" + x + ", " + y + ")");
+
+    // Create rect and fill
+    rects.append("rect")
+        .attr("x", d => xScale(d) + borderWidth)
+        .attr("y", borderWidth)
+        .attr("width", d => xScale(1)-(borderWidth*2))
+        .attr("height", height - (borderWidth*2) - labelSpace)
+        .attr("fill", d => colorScale(domainScale(d)))
+        .style("stroke", "black")
+        .style("stroke-width", borderWidth)
+
+    // Add scale values to beginning, middle, and end
+    rects.append("text")
+        .attr("x", d => xScale(d) + xScale(1)/2 - SIGNIFICANT_DIGITS*FONT_SIZE/2)
+        .attr("y", height - (borderWidth*2) - labelSpace + FONT_SIZE)
+        .attr("font-size", FONT_SIZE + "px")
+        .text(d => domainScale(d).toFixed(SIGNIFICANT_DIGITS))
+}
+
+/****************************************************** 
+ * TODO: Document
+*******************************************************/
 function getDesignFromString(name) {
     switch (name) {
         case 'Conv2d':
@@ -550,11 +648,14 @@ function calcDrawVars(node, position) {
         width = LEAF_PADDING * 2 + node.name.length * FONT_SIZE
         height = LEAF_PADDING * 2 + FONT_SIZE
     }
-
+    
     node.drawVars.width = width
     node.drawVars.height = height
 }
 
+/****************************************************** 
+ * TODO: Document
+*******************************************************/
 function centerNodesAndSetNext(node) {
     const parentY = node.drawVars.y;
     const parentHeight = node.drawVars.height;
