@@ -161,22 +161,11 @@ function drawLinear(data) {
         data.push(temp); 
     }
 
-    //find max/min weight value
-    /*min = weight_matrix[0][0] ; 
-    max = weight_matrix[0][0] ; 
-    for (var i = 0; i < numrows; i++) {
-        for (var j = 0; j < numcols; j++) {
-           if(weight_matrix[i][j]<min){
-                min= weight_matrix[i][j] ; 
-           }
-           if(weight_matrix[i][j]>max){
-                max= weight_matrix[i][j] ; 
-           }
-    }
-    console.log(max, "  ", min) ;  */
+    // Find min & max values
+    let min = Math.min.apply(Math, weight_matrix.map(row => Math.min.apply(Math, row.map(val => val))));
+    let max = Math.max.apply(Math, weight_matrix.map(row => Math.max.apply(Math, row.map(val => val))));
 
-    var max =0.043576840311288834 ; 
-    var min = -0.04393909499049187 ; 
+    console.log(min, max)
 
     let colorDomain = [min,0.0, max]
     let colorRange = ["blue", "white", "red"]
@@ -202,7 +191,6 @@ function drawLinear(data) {
 
     // Create Legend
     createLegend(svg, 0, titleHeight + 20, legendHeight, screen.width * 0.9, colorDomain, colorRange, 10, 2, 10, 4);
-        
 
     svg.append("rect")
         .attr("width", width)
@@ -248,7 +236,7 @@ x_axis.append("text")
     .attr("text-anchor", "start")
     .style("font-size",  8)
     .text(function(d, i) {
-        return i % 10 == 0 ? d : ""; 
+        return (i + 1) % 10 == 0 || i == 0 ? d+1 : ""; 
     }); 
 
 
@@ -262,7 +250,7 @@ x_axis.append("text")
     .attr("text-anchor", "start")
     .style("font-size",  8)
     .text(function(d, i) {
-        return i % 10 == 0 ? d : ""; 
+        return (i + 1) % 10 == 0 || i == 0 ? d+1 : "";
     }); 
 
 //x,y  axis title
@@ -296,7 +284,9 @@ svg.append("text")
         .data(function(d, i) { 
             return d ; 
          })
-        .on("mouseover", (evt, d) => createToolTip(evt,"weight value: "+d[0] + "<br> Input channel#: "+ d[1]+"<br> Ouput channel#: "+ d[2]))
+        .on("mouseover", (evt, d) => createToolTip(evt,"weight value: "+d[0] + 
+            "<br> Input channel#: " + (d[1] + 1) +
+            "<br> Ouput channel#: " + (d[2] + 1) ))
         .on("mouseout", (evt, d) => removeToolTip()); 
 }
 
