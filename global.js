@@ -101,23 +101,62 @@ function drawBatchNorm2d(data) {
         .attr("width", width)
         .attr("height", height);
         
+    // Create Title
+    let titleHeight = 50;
+    const title = svg.append("text")
+        .attr("x", 0)
+        .attr("y", titleHeight)
+        .attr("font-size", titleHeight + "px")
+        .text("Batch2dNorm Layer");
+
+    // Create Legend
+    let legendHeight = 50;
+    createLegend(svg, 0, titleHeight + 20, legendHeight, screen.width * 0.9, [d3.min(data.data.weight), d3.max(data.data.weight)], ['orange','blue'], 10, 2, 10, 4);
+        
     // Set up graph in SVG
     var g = svg.append("g")
     
-    //
-    g.append("g")
-      .attr("class", "axis axis--x")
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x));
-      
-    g.append("g")
-      .attr("class", "axis axis--y")
-      .append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("dy", "0.71em")
-      .attr("text-anchor", "end")
-      .text("Weight Size");
+    x_label='Features'
+    var x_axis = svg.selectAll(".x_axis")
+    .data(x_label)
+    .enter().append("g")
+    .attr("transform", function(d, i) { return "translate(" + x(i) + ", " + (margin.top - 10) + ")"; });
+
+    x_axis.append("text")
+    .attr("text-anchor", "start")
+    .style("font-size",  8)
+    .text(function(d, i) {
+        return (i + 1) % 10 == 0 || i == 0 ? d+1 : ""; 
+    }); 
+
+
+//y axis 
+   y_label = 'Magnitude of Weight'
+   var y_axis = svg.selectAll(".y_axis")
+    .data(y_label)
+    .enter().append("g")
+    .attr("transform", function(d, i) {  var temp=y(i)+4; return "translate(30, " + temp +")"; }); //25
+
+    y_axis.append("text")
+    .attr("text-anchor", "start")
+    .style("font-size",  8)
+    .text(function(d, i) {
+        return (i + 1) % 10 == 0 || i == 0 ? d+1 : "";
+    }); 
+
+//x,y  axis title
+svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("x", 140)
+    .attr("y", margin.top - 40)
+    .text("Features");
+
+svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 15)
+    .attr("x", -margin.top)
+    .text("Magnitude of Weight");
 
     g.selectAll(".bar")
       .data(data.data.weight)
