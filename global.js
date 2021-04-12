@@ -406,9 +406,20 @@ function drawConv2d(data) {
         .text(d => d+1)
 
     function drawKernels(data) {
+        // Inject Meta Data
+        kernelMeta = [];
+        data.kernel.forEach((row, i) => {
+            kernelMeta.push({
+                in_channel : data.in_channel,
+                out_channel : data.out_channel,
+                row : row,
+                row_i : i
+            })
+        });
+
         // Kernel Row
         var cell = d3.select(this).selectAll(".kernel_row")
-            .data(data.kernel)
+            .data(kernelMeta)
             .enter().append("g")
             .attr("class", "kernel_row")
             .attr("transform", (d, i) => "translate(0, " + (i * (cellSize + (cellBorder * 2))) + ")")
@@ -416,9 +427,20 @@ function drawConv2d(data) {
     }
 
     function drawKernelCells(data) {
+        // Inject Meta Data
+        rowMeta = [];
+        data.row.forEach((col, j) => {
+            rowMeta.push({
+                in_channel : data.in_channel,
+                out_channel : data.out_channel,
+                value : col,
+                row_i : data.row_i,
+                col_j : j
+            })
+        });
         // Kernel Cell
         d3.select(this).selectAll(".kernel_cell")
-            .data(data)
+            .data(rowMeta)
             .enter().append("rect")
             .attr("class", "kernel_cell")
             .attr("x", (d, i) => i * (cellSize + (cellBorder * 2)))
@@ -426,12 +448,16 @@ function drawConv2d(data) {
             .attr("height", cellSize)
             .attr("rx", borderRadius)
             .attr("ry", borderRadius)
-            .style("fill", d => COLORS(d))
+            .style("fill", d => COLORS(d.value))
             .style("stroke", borderColor)
             .style("stroke-width", cellBorder)
             .on("mouseover", (evt, d) => {
                 evt.target.id = "active"
-                createToolTip(evt, "Value: " + d)
+                text = "<strong>Value</strong>: " + d.value + "<br>"
+                    + "<strong>Kernel Position</strong>: (" + d.row_i + ", " + d.col_j + ") <br>"
+                    + "<strong>In Channel</strong>: " + (d.in_channel + 1) + "<br>"
+                    + "<strong>Out Channel</strong>: " + (d.out_channel + 1)
+                createToolTip(evt, text)
             })
             .on("mouseout", (evt, d) => {
                 evt.target.id = ""
