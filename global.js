@@ -22,6 +22,7 @@ const DESIGNS = {
 };
 
 const ACTIVE_ID = 'active';
+const CURRENT_ID = 'current';
 const TOOLTIP_ID = 'tooltip';
 const LEAF_CLASS = 'leaf';
 const CLICKABLE_CLASS = 'clickable';
@@ -592,6 +593,14 @@ async function drawArchitecture() {
             if (currentDesign === DESIGNS.INVALID) {
                 currentDesign = DESIGNS.ARCHITECTURE;
             } else {
+                // handle current highlighting
+                elements = document.getElementsByClassName(CURRENT_ID);
+                for (var i = 0; i < elements.length; ++i) {
+                    elements[i].classList.remove(CURRENT_ID);
+                }
+                evt.target.classList.add(CURRENT_ID);
+
+                // Draw visualization
                 draw(d);
             }
         })
@@ -885,7 +894,6 @@ function createToolTip(evt, text) {
     var div = document.createElement("DIV");
     xOffset = 10;
     yOffset = 10;
-    console.log(screen.height - evt.y)
     if (screen.height - evt.y < 220) {
         yOffset = -100;
     }

@@ -31,6 +31,10 @@
     fill: aqua !important;
 }
 
+.leaf.current {
+    fill: rgb(100, 253, 159) !important;
+}
+
 .leaf#active:active {
     fill: rgb(2, 189, 189) !important;
 }
