@@ -11,6 +11,7 @@
 ******************************************************/
 //! CONSTANTS
 const SVG_ID = "network";
+const VIS_ID = "module";
 const LOADING_PATH = "loading.gif";
 const DESIGNS = {
     ARCHITECTURE: 'architecture',
@@ -102,7 +103,7 @@ function drawBatchNorm2d(data) {
         .range([height, 0]);
     
     // SVG initialize
-    var svg = d3.select('#' + SVG_ID)
+    var svg = d3.select('#' + VIS_ID)
         .append("svg")
         .attr("width", width)
         .attr("height", height);
@@ -224,7 +225,7 @@ function drawLinear(data) {
     let height = numrows * 6;
     var margin = {top: 60 + titleHeight + legendHeight + 20, right: 160, bottom: 120, left: 60}; 
 
-    var svg = d3.select('#' + SVG_ID)
+    var svg = d3.select('#' + VIS_ID)
         .append("svg")
         .attr("width", width+margin.left + margin.right)
         .attr("height", height+ margin.top + margin.bottom) ; 
@@ -377,7 +378,7 @@ function drawConv2d(data) {
         + FONT_SIZE * 4 // For Axis Labels
         + extraPadding; //Extra padding on bottom
 
-    var svg = d3.select('#' + SVG_ID)
+    var svg = d3.select('#' + VIS_ID)
         .append("svg")
         .attr("width", width)
         .attr("height", height);
@@ -536,10 +537,11 @@ async function drawArchitecture() {
     //Toggle Loading Image
     toggleLoadingImage();
 
+    let bottomPadding = 20;
     var svg = d3.select('#' + SVG_ID)
         .append("svg")
         .attr("width", containers[0].drawVars.width)
-        .attr("height", containers[0].drawVars.height);
+        .attr("height", containers[0].drawVars.height + bottomPadding);
         
     let borderRadius = 4;
 
@@ -906,16 +908,8 @@ function removeToolTip() {
 *******************************************************/
 function clear() {
     removeToolTip()
-    drawArea = document.getElementById(SVG_ID);
+    drawArea = document.getElementById(VIS_ID);
     drawArea.innerHTML = ''; //TODO: optimize later
-}
-
-/****************************************************** 
- * TODO: Document
-*******************************************************/
-function reset() {
-    currentDesign = DESIGNS.ARCHITECTURE;
-    draw(null);
 }
 
 /****************************************************** 
