@@ -356,7 +356,7 @@ function drawConv2d(data) {
     const TITLE_TEXT = "Convolutional Layer Visualization";
     let titleHeight = 50;
     let bottomTitleMargin = 30;
-    let extraPadding = 10;
+    let extraPadding = 60;
 
     let weights = data.data.weight;
 
@@ -883,8 +883,17 @@ function createModuleToolTip(evt, d) {
 function createToolTip(evt, text) {
     // Create Tooltip box
     var div = document.createElement("DIV");
-    div.style.top = (evt.y + window.scrollY + 10) + "px";
-    div.style.left = (evt.x + window.scrollX + 10) + "px";
+    xOffset = 10;
+    yOffset = 10;
+    console.log(screen.height - evt.y)
+    if (screen.height - evt.y < 220) {
+        yOffset = -100;
+    }
+    if (screen.width - evt.x < 220) {
+        xOffset = -200;
+    }
+    div.style.top = (evt.y + window.scrollY + yOffset) + "px";
+    div.style.left = (evt.x + window.scrollX + xOffset) + "px";
     div.id = TOOLTIP_ID;
 
     // Set Tooltip text
