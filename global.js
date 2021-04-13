@@ -345,11 +345,11 @@ svg.append("text")
  * TODO: Make size react to user window size
 *******************************************************/
 function drawConv2d(data) {
-    let borderRadius = 4;
-    let cellSize = 40;
-    let cellBorder = 2;
+    let borderRadius = 0;
+    let cellSize = 6;
+    let cellBorder = 0;
     let borderColor = "black";
-    let margin = 50;
+    let margin = 2;
     let legendHeight = 50;
     let legendWidth = screen.width * 0.9;
     let bottomLegendMargin = 30;
@@ -397,7 +397,7 @@ function drawConv2d(data) {
 
 
     // Create Legend
-    createLegend(svg, xMargin, yMargin, legendHeight, legendWidth, domain, range, 10, 2, 10, borderRadius);
+    createLegend(svg, xMargin, yMargin, legendHeight, legendWidth, domain, range, 10, 2, 10, 4);
     yMargin += legendHeight + bottomLegendMargin;
 
     // Setting up data to be drawn
