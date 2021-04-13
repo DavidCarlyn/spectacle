@@ -1,3 +1,19 @@
+#network {
+    overflow-x: scroll;
+}
+
+#module_wrapper {
+    overflow-x: scroll;
+}
+
+#module_wrapper, #module {
+    transform:rotateX(180deg);
+    -moz-transform:rotateX(180deg); /* Mozilla */
+    -webkit-transform:rotateX(180deg); /* Safari and Chrome */
+    -ms-transform:rotateX(180deg); /* IE 9+ */
+    -o-transform:rotateX(180deg); /* Opera */
+}
+
 #tooltip {
     position: absolute;
     background-color: lightskyblue;
