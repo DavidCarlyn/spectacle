@@ -413,20 +413,30 @@ function drawConv2d(data) {
         });
     });
 
-    // Description of axis
-    // Create Title
-    const axisLabels = svg.append("text")
+    // Description of xaxis
+    xMargin += FONT_SIZE * 4;
+    const xAxisTitle = svg.append("text")
         .attr("x", xMargin)
         .attr("y", yMargin + FONT_SIZE)
         .attr("font-size", FONT_SIZE + "px")
-        .text("X-Axis: In Channels  |  Y-Axis: Out Channels");
+        .text("In Channel");
 
     yMargin += FONT_SIZE * 3;
 
-    // Give Room for xAxis & yAxis
+    // Give Room for yAxis
     var xAxisY = yMargin;
     yMargin += FONT_SIZE;
-    xMargin += FONT_SIZE * 3;
+
+    // Description of yaxis
+    const yAxisTitle = svg.append("text")
+        .attr("text-anchor", "end")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -yMargin - FONT_SIZE)
+        .attr("y", FONT_SIZE + 2)
+        .attr("font-size", FONT_SIZE + "px")
+        .text("Out Channel");
+
+    
 
     // Draw Kernels
     var kernels = svg.selectAll(".kernel")
@@ -450,7 +460,7 @@ function drawConv2d(data) {
         .data(d3.range(data.data.out_channels))
         .enter().append("text")
         .attr("font-size", FONT_SIZE + "px")
-        .attr("x", 0)
+        .attr("x", FONT_SIZE * 2)
         .attr("y", d => yMargin + (d + 0.5) * kernelHeight + d * margin + FONT_SIZE/2)
         .text(d => d+1)
 
@@ -502,6 +512,7 @@ function drawConv2d(data) {
             .style("stroke-width", cellBorder)
             .on("mouseover", (evt, d) => {
                 evt.target.id = "active"
+                evt.target.style.strokeWidth = 1;
                 text = "<strong>Value</strong>: " + d.value + "<br>"
                     + "<strong>Kernel Position</strong>: (" + d.row_i + ", " + d.col_j + ") <br>"
                     + "<strong>In Channel</strong>: " + (d.in_channel + 1) + "<br>"
@@ -510,6 +521,7 @@ function drawConv2d(data) {
             })
             .on("mouseout", (evt, d) => {
                 evt.target.id = ""
+                evt.target.style.strokeWidth = cellBorder;
                 removeToolTip()
             });
     }
