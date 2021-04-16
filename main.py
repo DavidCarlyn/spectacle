@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import json
 
+from argparse import ArgumentParser
 from typing import TypeVar
 from torchvision import models
 
@@ -77,7 +78,15 @@ def create_model_graph(module, parent):
             parent.add_child(node)
 
 if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("--model", type=str, default=None)
+    parser.add_argument("--class_num", type=int, default=1000)
+    args = parser.parse_args()
+
     model = models.resnet18(pretrained=True)
+    if args.model is not None:
+        model.fc = nn.Linear(model.fc.in_features, args.class_num)
+        #model.load_state_dict(torch.load(args.model))
     graph = NN_Node("root")
     print("Creating Graph")
     create_model_graph(model, graph)
